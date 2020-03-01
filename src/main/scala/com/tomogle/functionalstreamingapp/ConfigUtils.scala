@@ -1,6 +1,7 @@
 package com.tomogle.functionalstreamingapp
 
 import com.tomogle.functionalstreamingapp.kafka.KafkaProducerConfig
+import com.tomogle.functionalstreamingapp.mqtt.MQTTClientConfig
 import com.tomogle.functionalstreamingapp.pulsar.PulsarConsumerConfig
 import com.tomogle.functionalstreamingapp.pulsar.PulsarProducerConfig
 
@@ -21,8 +22,18 @@ object ConfigUtils {
     topic = "test-topic"
   )
 
-  def readKafkaOutletConfig(): KafkaProducerConfig = KafkaProducerConfig(
+  def readKafkaProducerConfig(): KafkaProducerConfig = KafkaProducerConfig(
     bootstrapServers = "localhost:29092",
     clientId = "myClientId"
+  )
+
+  def readConsumerMQTTClientConfig(): MQTTClientConfig = MQTTClientConfig(
+    serverURI = "tcp://localhost:1883",
+    topic = "testtopic"
+  )
+
+  def readProducerMQTTClientConfig(): MQTTClientConfig = MQTTClientConfig(
+    serverURI = "tcp://localhost:1883",
+    topic = "testtopic2"
   )
 }

@@ -2,6 +2,21 @@ version: '2'
 
 services:
 
+  activemq:
+    image: rmohr/activemq:5.10.0
+    container_name: activemq
+    environment:
+      - "TZ=Europe/Amsterdam"
+    volumes:
+      - "./activemq/activemq.xml:/conf/activemq.xml"
+    ports:
+      - "61616:61616" # broker/jms (admin:adminactivemq)(amq:amq)
+      - "8161:8161" # web UI http://localhost:8161/admin (admin:admin)
+      - "1883:1883" # mqtt
+      - "5672:5672" # amqp
+      - "61613:61613" # stomp
+      - "61614:61614" # ws
+
   pulsar:
     container_name: pulsar
     image: apachepulsar/pulsar:2.5.0

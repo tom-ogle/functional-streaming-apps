@@ -40,9 +40,11 @@ object PulsarFeed {
       .subscribe()
 
     sys.addShutdownHook {
-      logger.warn("Post shutdown hook: Closing Pulsar Consumer")
-      consumer.close()
-      logger.warn("Post shutdown hook: Finished closing Pulsar Consumer")
+      if (consumer.isConnected) {
+        logger.warn("Post shutdown hook: Closing Pulsar Consumer")
+        consumer.close()
+        logger.warn("Post shutdown hook: Finished closing Pulsar Consumer")
+      }
     }
     consumer
   }
@@ -56,11 +58,13 @@ object PulsarFeed {
       .topic(config.topic)
       .create()
     sys.addShutdownHook {
-      logger.warn("Post shutdown hook: Flushing Pulsar Producer")
-      producer.flush()
-      logger.warn("Post shutdown hook: Closing Pulsar Producer")
-      producer.close()
-      logger.warn("Post shutdown hook: Finished closing Pulsar Producer")
+      if(producer.isConnected) {
+        logger.warn("Post shutdown hook: Flushing Pulsar Producer")
+        producer.flush()
+        logger.warn("Post shutdown hook: Closing Pulsar Producer")
+        producer.close()
+        logger.warn("Post shutdown hook: Finished closing Pulsar Producer")
+      }
     }
     producer
   }

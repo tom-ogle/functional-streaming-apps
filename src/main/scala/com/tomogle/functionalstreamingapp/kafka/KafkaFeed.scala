@@ -10,6 +10,8 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 
+import scala.util.Try
+
 
 /**
  *
@@ -21,7 +23,7 @@ object KafkaFeed {
   def producerTask(): Task[KafkaProducer[String, String]] =
     for {
       _ <- Task(logger.info("Creating Kafka producer"))
-      kafkaConfig <- Task(ConfigUtils.readKafkaOutletConfig())
+      kafkaConfig <- Task(ConfigUtils.readKafkaProducerConfig())
       producer <- Task(KafkaFeed.producer(kafkaConfig))
     } yield producer
 
@@ -34,9 +36,9 @@ object KafkaFeed {
     val producer = new KafkaProducer[String, String](props)
     sys.addShutdownHook {
       logger.warn("Post shutdown hook: Flushing KafkaProducer")
-      producer.flush()
+      Try(producer.flush())
       logger.warn("Post shutdown hook: Closing KafkaProducer")
-      producer.close(Duration.ofSeconds(5))
+      Try(producer.close(Duration.ofSeconds(5)))
       logger.warn("Post shutdown hook: Finished closing KafkaProducer")
     }
     producer

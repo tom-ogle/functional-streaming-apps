@@ -21,9 +21,9 @@ import monix.execution.Scheduler.Implicits.global
 /**
  *
  */
-object MonixApp {
+object MonixPulsarToKafkaApp {
 
-  private val logger: Logger = Logger(MonixApp.getClass)
+  private val logger: Logger = Logger(MonixPulsarToKafkaApp.getClass)
 
   def main(args: Array[String]): Unit = {
     val future = setupApp().runToFuture
@@ -38,7 +38,7 @@ object MonixApp {
     val stream =
       kafkaProducer.bracket(consumeStream(pulsarConsumer))(producer =>
         Task {
-          logger.info("Closing KafkaProducer")
+          logger.info("Closing Producer")
           producer.close()
         }.delayExecution(3 seconds)
       )
