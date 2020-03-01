@@ -1,4 +1,4 @@
-name := "functional-streaming-app"
+name := "functional-streaming-apps"
 
 version := "0.1"
 
