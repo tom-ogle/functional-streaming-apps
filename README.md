@@ -11,15 +11,16 @@ There is a `docker-compose.yml` file include din the repo to allow you to run th
 
 ## Applications
  
-### MonixPulsarToKafkaApp
+### MonixPulsarToKafkaApp and MonixPulsarToKafkaApp2
 
-A Monix app that consumes using Pulsar and publishes to Kafka.
+`MonixPulsarToKafkaApp` is a Monix app that consumes using Pulsar and publishes to Kafka. 
 It uses Monix `Task` and `Observable`.
+`MonixPulsarToKafkaApp2` is similar to `MonixPulsarToKafkaApp` but uses Observable for resources rather than Task. 
 
-To see it in action:
+To see one of these apps in action:
 
 * Run `docker-compose up` to spin up the message brokers
-* Run `MonixPulsarToKafkaApp#main` to run the app
+* Run `MonixPulsarToKafkaApp#main` or `MonixPulsarToKafkaApp2` to run the app
 * Run `PulsarFeed#main` to publish some test messages
 * Watch the logs as the messages are processed
  
