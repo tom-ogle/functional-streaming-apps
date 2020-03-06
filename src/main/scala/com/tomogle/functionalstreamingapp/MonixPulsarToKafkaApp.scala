@@ -71,16 +71,22 @@ object MonixPulsarToKafkaApp {
       transformedMessage <- Task(processMessage(message.getValue))
       _ <- Task(logger.debug("Transformed message " + transformedMessage))
       record <- Task(new ProducerRecord("testtopic", message.getKey, transformedMessage))
-      _ <- Task(producer.send(record, (metadata: RecordMetadata, exception: Exception) => {
-        if (exception != null) {
-          logger.error(s"Failed message send MessageID: ${message.getMessageId} , Key: ${message.getKey}, Message: $transformedMessage, Exception message: ${exception.getMessage}", exception)
-          consumer.negativeAcknowledge(message)
-        } else {
-          logger.trace(s"Pulsar message: ${message.getMessageId} acknowledged on kafka at offset: ${metadata.offset()} and partition: ${metadata.partition()}, Message: $transformedMessage")
-          consumer.acknowledge(message)
+      sendResult <- Task.asyncF[(RecordMetadata, Option[Exception])](cb => Task {
+        // TODO: Try out using https://github.com/monix/monix-kafka
+        producer.send(record, (metadata: RecordMetadata, exception: Exception) => cb(Right(metadata, Option(exception))))
+        logger.debug("Sent message async " + transformedMessage)
+      })
+      _ <- Task {
+        println("Matching sendResult")
+        sendResult match {
+          case (metaData, Some(exception)) =>
+            logger.error(s"Failed message send MessageID: ${message.getMessageId} , Key: ${message.getKey}, Message: $transformedMessage, Exception message: ${exception.getMessage}", exception)
+            consumer.negativeAcknowledge(message)
+          case (metaData, None) =>
+            logger.debug(s"Pulsar message: ${message.getMessageId} acknowledged on kafka at offset: ${metaData.offset()} and partition: ${metaData.partition()}, Message: $transformedMessage")
+            consumer.acknowledge(message)
         }
-      }))
-      _ <- Task(logger.debug("Sent message " + transformedMessage))
+      }
     } yield ()
   }
 

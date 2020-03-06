@@ -1,5 +1,6 @@
 package com.tomogle.functionalstreamingapp.pulsar
 
+import cats.effect.IO
 import com.tomogle.functionalstreamingapp.ConfigUtils
 import com.typesafe.scalalogging.Logger
 import monix.eval.Task
@@ -21,6 +22,13 @@ object PulsarFeed {
     pulsarProducer.close()
     System.exit(0)
   }
+
+  def consumerIO(): IO[Consumer[String]] =
+    for {
+      _ <- IO(logger.info("Creating Pulsar consumer"))
+      pulsarConfig <- IO(ConfigUtils.readPulsarConsumerConfig())
+      consumer <- IO(PulsarFeed.consumer(pulsarConfig))
+    } yield consumer
 
   def consumerTask(): Task[Consumer[String]] =
     for {

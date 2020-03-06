@@ -3,6 +3,7 @@ package com.tomogle.functionalstreamingapp.kafka
 import java.time.Duration
 import java.util.Properties
 
+import cats.effect.IO
 import com.tomogle.functionalstreamingapp.ConfigUtils
 import com.typesafe.scalalogging.Logger
 import monix.eval.Task
@@ -19,6 +20,14 @@ import scala.util.Try
 object KafkaFeed {
 
   private val logger: Logger = Logger(KafkaFeed.getClass)
+
+  def producerIO(): IO[KafkaProducer[String, String]] = {
+    for {
+      _ <- IO(logger.info("Creating Kafka producer"))
+      kafkaConfig <- IO(ConfigUtils.readKafkaProducerConfig())
+      producer <- IO(KafkaFeed.producer(kafkaConfig))
+    } yield producer
+  }
 
   def producerTask(): Task[KafkaProducer[String, String]] =
     for {

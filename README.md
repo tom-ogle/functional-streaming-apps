@@ -1,8 +1,8 @@
-# Functional Streaming Apps
+# Functional Streaming Apps Spike
 
 ## Introduction
 
-Working example apps built using Functional programming libraries, such as Monix.
+Working example apps built using Functional programming libraries, such as Monix and Cats Effect.
 The apps were developed as exploratory spikes without tests and are not production ready.
 They read some messages from a message broker, do some toy transformations and write the messages to a message broker.
 The logging is extra verbose so that you can see what is happening.
@@ -34,4 +34,13 @@ To see it in action:
 * Run `docker-compose up` to spin up the message brokers
 * Run `MonixMqttToMqttApp#main` to run the app
 * Run `MQTTFeed#main` to publish some test messages
+* Watch the logs as the messages are processed
+
+### CatsEffectApp
+
+An app that consumes using Pulsar and publishes to Kafka, using Cats Effect. 
+
+* Run `docker-compose up` to spin up the message brokers
+* Run `CatsEffectApp#main` to run the app
+* Run `PulsarFeed#main` to publish some test messages
 * Watch the logs as the messages are processed
