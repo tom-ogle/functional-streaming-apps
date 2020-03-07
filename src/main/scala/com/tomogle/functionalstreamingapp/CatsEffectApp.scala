@@ -1,12 +1,11 @@
 package com.tomogle.functionalstreamingapp
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import com.tomogle.functionalstreamingapp.kafka.KafkaFeed
 import com.tomogle.functionalstreamingapp.pulsar.PulsarFeed
 import com.typesafe.scalalogging.Logger
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord, RecordMetadata}
 import org.apache.pulsar.client.api.Consumer
-
 import cats.implicits._
 
 object CatsEffectApp {
@@ -14,10 +13,13 @@ object CatsEffectApp {
   private val logger: Logger = Logger(CatsEffectApp.getClass)
 
   def main(args: Array[String]): Unit = {
-    setupApp().unsafeRunSync()
+    // Demonstrate the same thing using Resource and bracket
+    val useResourceOverBracket = true
+    val app = if (useResourceOverBracket) setupAppWithResource() else setupAppWithBracket()
+    app.unsafeRunSync()
   }
 
-  private def setupApp(): IO[Unit] = {
+  private def setupAppWithBracket(): IO[Unit] = {
     val kafkaProducer: IO[KafkaProducer[String, String]] = KafkaFeed.producerIO()
     val pulsarConsumer: IO[Consumer[String]] = PulsarFeed.consumerIO()
 
@@ -38,6 +40,33 @@ object CatsEffectApp {
             logger.info("Closed Producer")
           }
         }
+  }
+
+  private def setupAppWithResource(): IO[Unit] = {
+
+    val output = Resource.make(KafkaFeed.producerIO())(producer => IO {
+      logger.info("Closing Producer")
+      producer.close()
+      logger.info("Closed Producer")
+    })
+
+    val input = Resource.make(PulsarFeed.consumerIO())(consumer => IO {
+      logger.info("Closing Consumer")
+      consumer.close()
+      logger.info("Closed Consumer")
+    })
+
+    val inputOutput = for {
+      in <- output
+      out <- input
+    } yield (in, out)
+
+    inputOutput.use(r => {
+      val (producer, consumer) = r
+      inToOut(consumer, producer).foreverM
+    })
+
+
   }
 
   def inToOut(consumer: Consumer[String], producer: KafkaProducer[String, String]): IO[Unit] = {
