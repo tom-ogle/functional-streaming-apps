@@ -39,7 +39,7 @@ object KafkaFeed {
   def producer(config: KafkaProducerConfig): KafkaProducer[String, String] = {
     val props = new Properties()
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.bootstrapServers)
-    props.put(ProducerConfig.CLIENT_ID_CONFIG, config.bootstrapServers)
+    props.put(ProducerConfig.CLIENT_ID_CONFIG, "my-producer")
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
     val producer = new KafkaProducer[String, String](props)
